@@ -1,0 +1,123 @@
+[
+  {
+    "description": "PKW: VW-Alias, unsauberes Whitespace im Modell, gültige VIN, plausible Werte",
+    "payload": {"vehicle_type": "car", "brand": "vw", "model": "golf   viii", "vin": "WVWZZZ1JZXW000001", "displacement_ccm": 1984, "power_kw": 150},
+    "expected_status": 200,
+    "expected": {"brand": "Volkswagen", "model": "Golf Viii", "vin_valid": true, "displacement_plausible": true, "power_plausible": true}
+  },
+  {
+    "description": "PKW: 'Volkswagen' bereits als Vollform -> identisches Ergebnis wie 'vw' (Abkürzung und Vollform müssen zusammenfallen)",
+    "payload": {"vehicle_type": "car", "brand": "Volkswagen", "model": "golf viii", "vin": "WVWZZZ1JZXW000002", "displacement_ccm": 1984, "power_kw": 150},
+    "expected_status": 200,
+    "expected": {"brand": "Volkswagen"}
+  },
+  {
+    "description": "PKW: Rechtsformzusatz 'AG' wird vor dem Alias-Abgleich entfernt -> gleiches Ergebnis wie 'vw'",
+    "payload": {"vehicle_type": "car", "brand": "Volkswagen AG", "model": "golf viii", "vin": "WVWZZZ1JZXW000003", "displacement_ccm": 1984, "power_kw": 150},
+    "expected_status": 200,
+    "expected": {"brand": "Volkswagen"}
+  },
+  {
+    "description": "PKW: Mercedes mit Leerzeichen statt Bindestrich",
+    "payload": {"vehicle_type": "car", "brand": "Mercedes Benz", "model": "c-klasse", "vin": "WDD2050001A123456", "displacement_ccm": 1497, "power_kw": 110},
+    "expected_status": 200,
+    "expected": {"brand": "Mercedes-Benz"}
+  },
+  {
+    "description": "PKW: Škoda mit und ohne Sonderzeichen (skoda vs. škoda) -> beide auf 'Škoda' normalisiert",
+    "payload": {"vehicle_type": "car", "brand": "skoda", "model": "octavia", "vin": "TMBJJ7NE0M0000001", "displacement_ccm": 1968, "power_kw": 110},
+    "expected_status": 200,
+    "expected": {"brand": "Škoda"}
+  },
+  {
+    "description": "PKW: kurzer Modellcode wird komplett großgeschrieben (a3 -> A3)",
+    "payload": {"vehicle_type": "car", "brand": "audi", "model": "a3", "vin": "WAUZZZ8V9KA000001", "displacement_ccm": 1498, "power_kw": 110},
+    "expected_status": 200,
+    "expected": {"brand": "Audi", "model": "A3"}
+  },
+  {
+    "description": "Motorrad: Harley-Alias, hoher Hubraum, plausible Werte",
+    "payload": {"vehicle_type": "motorcycle", "brand": "harley", "model": "street bob", "vin": "1HD1KB4197Y000001", "displacement_ccm": 1746, "power_kw": 63},
+    "expected_status": 200,
+    "expected": {"brand": "Harley-Davidson", "displacement_plausible": true}
+  },
+  {
+    "description": "Motorrad: kleiner 125er-Roller (typischer A1-Führerschein-Bereich)",
+    "payload": {"vehicle_type": "motorcycle", "brand": "yamaha", "model": "yzf-r 125", "vin": "JYARJ06E000000001", "displacement_ccm": 125, "power_kw": 11},
+    "expected_status": 200,
+    "expected": {"brand": "Yamaha", "displacement_plausible": true}
+  },
+  {
+    "description": "Motorrad: 'BMW Motorrad' als vollständige Bezeichnung -> normalisiert auf 'BMW'",
+    "payload": {"vehicle_type": "motorcycle", "brand": "bmw motorrad", "model": "r 1250 gs", "vin": "WB10A0309LZ000001", "displacement_ccm": 1254, "power_kw": 100},
+    "expected_status": 200,
+    "expected": {"brand": "BMW"}
+  },
+  {
+    "description": "Unplausibel: 125ccm bei einem PKW (displacement_plausible=false, aber kein Request-Fehler)",
+    "payload": {"vehicle_type": "car", "brand": "opel", "model": "corsa", "vin": "W0L0AHL0855000001", "displacement_ccm": 125, "power_kw": 150},
+    "expected_status": 200,
+    "expected": {"displacement_plausible": false}
+  },
+  {
+    "description": "Unplausibel: sehr hohe Leistung bei einem Motorrad (power_plausible=false, aber kein Request-Fehler)",
+    "payload": {"vehicle_type": "motorcycle", "brand": "kawasaki", "model": "ninja h2", "vin": "JKAZXCJ15LA000001", "displacement_ccm": 998, "power_kw": 250},
+    "expected_status": 200,
+    "expected": {"power_plausible": false}
+  },
+  {
+    "description": "Unbekannte Marke (kein Alias hinterlegt, nur Title Case)",
+    "payload": {"vehicle_type": "car", "brand": "toyota", "model": "corolla", "vin": "JTDBR32E720012345", "displacement_ccm": 1800, "power_kw": 103},
+    "expected_status": 200,
+    "expected": {"brand": "Toyota"}
+  },
+  {
+    "description": "PKW: BMW als ausgeschriebene Langform statt Abkürzung -> gleiches Ergebnis wie 'bmw'",
+    "payload": {"vehicle_type": "car", "brand": "Bayerische Motoren Werke", "model": "3er", "vin": "WVWZZZ1JZXW000000", "displacement_ccm": 1998, "power_kw": 140},
+    "expected_status": 200,
+    "expected": {"brand": "BMW"}
+  },
+  {
+    "description": "Ungültige VIN: enthält verbotenen Buchstaben 'I' (kein Request-Fehler, nur vin_valid=false)",
+    "payload": {"vehicle_type": "car", "brand": "bmw", "model": "3er", "vin": "WVWZZZ1JZXWI00001", "displacement_ccm": 1998, "power_kw": 140},
+    "expected_status": 200,
+    "expected": {"vin_valid": false}
+  },
+  {
+    "description": "Ungültige VIN: enthält verbotenen Buchstaben 'O'",
+    "payload": {"vehicle_type": "car", "brand": "bmw", "model": "3er", "vin": "WVWZZZ1JZXWO00001", "displacement_ccm": 1998, "power_kw": 140},
+    "expected_status": 200,
+    "expected": {"vin_valid": false}
+  },
+  {
+    "description": "Ungültige VIN: falsche Länge (zu kurz)",
+    "payload": {"vehicle_type": "motorcycle", "brand": "ktm", "model": "duke 390", "vin": "TOO-SHORT-VIN", "displacement_ccm": 373, "power_kw": 32},
+    "expected_status": 200,
+    "expected": {"vin_valid": false}
+  },
+  {
+    "description": "Ungültiger Request: leeres Markenfeld -> 422",
+    "payload": {"vehicle_type": "car", "brand": "   ", "model": "golf", "vin": "WVWZZZ1JZXW000001", "displacement_ccm": 1984, "power_kw": 150},
+    "expected_status": 422
+  },
+  {
+    "description": "Ungültiger Request: leeres Modellfeld -> 422",
+    "payload": {"vehicle_type": "car", "brand": "vw", "model": "   ", "vin": "WVWZZZ1JZXW000001", "displacement_ccm": 1984, "power_kw": 150},
+    "expected_status": 422
+  },
+  {
+    "description": "Ungültiger Request: negativer Hubraum -> 422 (displacement_ccm muss > 0 sein)",
+    "payload": {"vehicle_type": "car", "brand": "vw", "model": "golf", "vin": "WVWZZZ1JZXW000001", "displacement_ccm": -100, "power_kw": 150},
+    "expected_status": 422
+  },
+  {
+    "description": "Ungültiger Request: Leistung gleich null -> 422 (power_kw muss > 0 sein)",
+    "payload": {"vehicle_type": "car", "brand": "vw", "model": "golf", "vin": "WVWZZZ1JZXW000001", "displacement_ccm": 1984, "power_kw": 0},
+    "expected_status": 422
+  },
+  {
+    "description": "Ungültiger Request: unbekannter vehicle_type -> 422",
+    "payload": {"vehicle_type": "truck", "brand": "man", "model": "tgx", "vin": "WVWZZZ1JZXW000001", "displacement_ccm": 10000, "power_kw": 300},
+    "expected_status": 422
+  }
+]
