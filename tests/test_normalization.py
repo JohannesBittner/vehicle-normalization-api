@@ -1,3 +1,5 @@
+import pytest
+
 from app.normalization import (
     normalize_brand,
     normalize_model,
@@ -95,7 +97,7 @@ def test_normalize_vehicle_record_car_end_to_end():
         model="golf viii",
         vin="WVWZZZ1JZXW000001",
         displacement_ccm=1984,
-        power_kw=150,
+        power_kw=150
     )
     assert result == {
         "vehicle_type": "car",
@@ -106,7 +108,7 @@ def test_normalize_vehicle_record_car_end_to_end():
         "displacement_ccm": 1984,
         "displacement_plausible": True,
         "power_kw": 150,
-        "power_plausible": True,
+        "power_plausible": True
     }
 
 
@@ -117,7 +119,7 @@ def test_normalize_vehicle_record_motorcycle_end_to_end():
         model="street bob",
         vin="1HD1KB4197Y000001",
         displacement_ccm=1746,
-        power_kw=63,
+        power_kw=63
     )
     assert result == {
         "vehicle_type": "motorcycle",
@@ -128,5 +130,39 @@ def test_normalize_vehicle_record_motorcycle_end_to_end():
         "displacement_ccm": 1746,
         "displacement_plausible": True,
         "power_kw": 63,
-        "power_plausible": True,
+        "power_plausible": True
     }
+
+
+@pytest.mark.parametrize(
+    "raw_brand, expected",
+    [
+        ("Volkswagen AG", "Volkswagen"),
+        ("Harley-Davidson, Inc.", "Harley-Davidson"),
+        ("BMW Group", "BMW"),
+        ("Beispiel GmbH & Co. KG", "Beispiel"),
+        ("Opel GmbH", "Opel"),
+        ("Some Company Ltd", "Some Company"),
+        ("Some Company Ltd.", "Some Company"),
+        ("Audi AG", "Audi"),
+        ("Toyota Motor Corp.", "Toyota Motor"),
+        ("Toyota Motor Corporation", "Toyota Motor"),
+        ("Example LLC", "Example"),
+        ("Example S.A.", "Example"),
+        ("Example SPA", "Example"),
+        ("Example N.V.", "Example"),
+        ("Example B.V.", "Example"),
+        ("Example PLC", "Example"),
+        ("Example KG", "Example"),
+        ("Example SE", "Example"),
+    ],
+)
+def test_normalize_brand_strips_various_legal_suffixes(raw_brand, expected):
+    """Deckt alle bekannten Rechtsformzusaetze aus _LEGAL_SUFFIXES ab, nicht nur zwei Beispiele."""
+    assert normalize_brand(raw_brand) == expected
+
+
+def test_normalize_brand_legal_suffix_case_insensitive():
+    # Rechtsform-Erkennung soll unabhaengig von Gross-/Kleinschreibung funktionieren
+    assert normalize_brand("Volkswagen ag") == "Volkswagen"
+    assert normalize_brand("volkswagen AG") == "Volkswagen"

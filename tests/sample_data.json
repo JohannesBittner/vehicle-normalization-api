@@ -12,6 +12,12 @@
     "expected": {"brand": "Volkswagen"}
   },
   {
+    "description": "PKW: Rechtsformzusatz 'AG' wird vor dem Alias-Abgleich entfernt -> gleiches Ergebnis wie 'vw'",
+    "payload": {"vehicle_type": "car", "brand": "Volkswagen AG", "model": "golf viii", "vin": "WVWZZZ1JZXW000003", "displacement_ccm": 1984, "power_kw": 150},
+    "expected_status": 200,
+    "expected": {"brand": "Volkswagen"}
+  },
+  {
     "description": "PKW: Mercedes mit Leerzeichen statt Bindestrich",
     "payload": {"vehicle_type": "car", "brand": "Mercedes Benz", "model": "c-klasse", "vin": "WDD2050001A123456", "displacement_ccm": 1497, "power_kw": 110},
     "expected_status": 200,
